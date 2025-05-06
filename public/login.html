@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JUIT Attendance Portal - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+        
+        .login-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .login-card:hover {
+            transform: translateY(-5px) scale(1.01);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        }
+        
+        .header {
+            background: linear-gradient(90deg, #1a3c6b 60%, #4a6baf 100%);
+            color: white;
+            padding: 2rem 1.5rem 1.2rem 1.5rem;
+            text-align: center;
+            border-bottom-left-radius: 18px;
+            border-bottom-right-radius: 18px;
+        }
+        
+        .header h1 {
+            font-size: 1.7rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+            letter-spacing: 1px;
+        }
+        
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .form-container {
+            padding: 2rem 1.5rem 1.5rem 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 15px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #053b6d;
+            box-shadow: 0 0 0 3px rgba(5, 59, 109, 0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(90deg, #1a3c6b 60%, #4a6baf 100%);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(90deg, #4a6baf 60%, #1a3c6b 100%);
+            transform: translateY(-2px) scale(1.01);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .forgot-password {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #053b6d;
+            text-decoration: none;
+            font-size: 15px;
+            transition: color 0.3s;
+        }
+        
+        .forgot-password:hover {
+            text-decoration: underline;
+            color: #022c56;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 15px;
+            background-color: white;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .logo img {
+            height: 80px;
+            width: auto;
+            object-fit: contain;
+        }
+        
+        .error-message {
+            color: #e03131;
+            font-size: 15px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .success-message {
+            color: #2b8a3e;
+            font-size: 15px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .form-container {
+                padding: 1rem;
+            }
+            
+            .header {
+                padding: 1.2rem 0.5rem 1rem 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-card">
+            <div class="header">
+                <h1>Jaypee University of Information Technology</h1>
+                <p>Attendance Management System</p>
+            </div>
+            
+            <div class="form-container">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="role">Login As</label>
+                        <select id="role" name="role" class="form-control" required>
+                            <option value="student">Student</option>
+                            <option value="teacher">Teacher</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id">ID</label>
+                        <input type="text" id="id" name="id" class="form-control" placeholder="Enter your ID" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
+                        <div id="errorMessage" class="error-message"></div>
+                        <div id="successMessage" class="success-message"></div>
+                    </div>
+                    
+                    <button type="submit" class="btn">Login</button>
+                </form>
+                
+                <a href="#" class="forgot-password">Forgot Password?</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 Jaypee University of Information Technology. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const role = document.getElementById('role').value;
+            const id = document.getElementById('id').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            
+            // Reset messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            // Login request to server
+            fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ role, id, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Login successful') {
+                    successMessage.textContent = 'Login successful! Redirecting...';
+                    successMessage.style.display = 'block';
+                    
+                    // Redirect to appropriate dashboard based on role
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 1000);
+                } else {
+                    errorMessage.textContent = data.message || 'Invalid credentials';
+                    errorMessage.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Login error:', error);
+                errorMessage.textContent = 'An error occurred. Please try again.';
+                errorMessage.style.display = 'block';
+            });
+        });
+
+        // Update placeholder text based on selected role
+        document.getElementById('role').addEventListener('change', function() {
+            const idInput = document.getElementById('id');
+            if (this.value === 'student') {
+                idInput.placeholder = 'Enter your roll number';
+            } else {
+                idInput.placeholder = 'Enter your teacher ID';
+            }
+        });
+    </script>
+</body>
+</html>

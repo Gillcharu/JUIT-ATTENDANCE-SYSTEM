@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JUIT Attendance Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #1a3c6b;
+            --secondary: #4a6baf;
+            --accent: #f7941d;
+            --light: #f5f7fa;
+            --dark: #333;
+            --danger: #dc3545;
+            --success: #28a745;
+            --warning: #ffc107;
+            --card-bg: #fff;
+            --card-shadow: 0 4px 24px rgba(0,0,0,0.07);
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+        }
+        
+        .header {
+            background: linear-gradient(90deg, #1a3c6b 60%, #4a6baf 100%);
+            color: white;
+            padding: 1.5rem 2.5rem 1.2rem 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-bottom-left-radius: 18px;
+            border-bottom-right-radius: 18px;
+        }
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+        .header .greeting {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-right: 2rem;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        .user-info img {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            margin-right: 12px;
+            border: 2px solid #fff;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 230px 1fr;
+            min-height: calc(100vh - 90px);
+        }
+        .sidebar {
+            background: #fff;
+            padding: 2.2rem 0 2.2rem 0;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+        }
+        .nav-item {
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            color: var(--dark);
+            text-decoration: none;
+            font-size: 1.08rem;
+            font-weight: 500;
+            border-left: 4px solid transparent;
+            transition: all 0.2s;
+            cursor: pointer;
+            border-radius: 0 20px 20px 0;
+            margin-bottom: 0.5rem;
+        }
+        .nav-item.active, .nav-item:hover {
+            background: linear-gradient(90deg, #e3eafc 60%, #f5f7fa 100%);
+            color: var(--primary);
+            border-left: 4px solid var(--accent);
+        }
+        .nav-item i {
+            margin-right: 12px;
+            font-size: 1.2rem;
+        }
+        .main-content {
+            padding: 2.5rem 2.5rem 2rem 2.5rem;
+        }
+        .page-title {
+            margin-bottom: 1.7rem;
+            color: var(--primary);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.7rem;
+            margin-bottom: 2.2rem;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            box-shadow: var(--card-shadow);
+            padding: 2rem 1.5rem 1.5rem 1.5rem;
+            margin-bottom: 2rem;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .card:hover {
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            transform: translateY(-4px) scale(1.01);
+        }
+        .stat-card {
+            display: flex;
+            align-items: center;
+        }
+        .stat-icon {
+            background: linear-gradient(135deg, #e3eafc 0%, #f5f7fa 100%);
+            color: var(--secondary);
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin-right: 1.2rem;
+            font-size: 2rem;
+            box-shadow: 0 2px 8px rgba(74, 107, 175, 0.08);
+        }
+        .stat-info h3 {
+            font-size: 1.7rem;
+            margin-bottom: 0.4rem;
+            font-weight: 700;
+        }
+        .attendance-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 1.05rem;
+        }
+        .attendance-table th, .attendance-table td {
+            padding: 0.85rem 1.1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .attendance-table th {
+            background: var(--light);
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .attendance-status {
+            display: inline-block;
+            padding: 0.3rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .status-present {
+            background: rgba(40, 167, 69, 0.12);
+            color: var(--success);
+        }
+        .status-absent {
+            background: rgba(220, 53, 69, 0.12);
+            color: var(--danger);
+        }
+        .status-leave {
+            background: rgba(255, 193, 7, 0.12);
+            color: var(--warning);
+        }
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            margin-top: 0.7rem;
+        }
+        .progress-bar {
+            height: 100%;
+            border-radius: 5px;
+            background: var(--secondary);
+            transition: width 1s ease-in-out;
+        }
+        .low {
+            background: var(--danger);
+        }
+        .medium {
+            background: var(--warning);
+        }
+        .high {
+            background: var(--success);
+        }
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                display: none;
+            }
+            .main-content {
+                padding: 1.2rem;
+            }
+        }
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 1rem 1rem 1rem 1rem;
+            }
+            .main-content {
+                padding: 0.5rem;
+            }
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1 style="margin: 0;">JUIT Attendance Portal</h1>
+        <span class="greeting" id="greeting">Welcome!</span>
+        <div class="user-info">
+            <img src="/api/placeholder/40/40" alt="User Avatar">
+            <div>
+                <p id="userName">Student Name</p>
+                <small id="userDetails">Loading...</small>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <aside class="sidebar">
+            <nav>
+                <a href="#" class="nav-item active">
+                    <i>📊</i> Dashboard
+                </a>
+                <a href="#" class="nav-item">
+                    <i>📅</i> My Attendance
+                </a>
+                <a href="#" class="nav-item">
+                    <i>📝</i> View Subjects
+                </a>
+                <a href="#" class="nav-item">
+                    <i>📋</i> Request Leave
+                </a>
+                <a href="#" class="nav-item">
+                    <i>🔔</i> Notifications
+                </a>
+                <a href="#" class="nav-item">
+                    <i>⚙️</i> Settings
+                </a>
+                <a href="#" class="nav-item" id="logoutBtn">
+                    <i>🚪</i> Logout
+                </a>
+            </nav>
+        </aside>
+        
+        <main class="main-content">
+            <h2 class="page-title">Attendance Dashboard</h2>
+            
+            <div class="dashboard-grid">
+                <div class="card stat-card">
+                    <div class="stat-icon">
+                        <i>📊</i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="overallAttendance">Loading...</h3>
+                        <p>Overall Attendance</p>
+                        <div class="progress-container">
+                            <div id="overallProgress" class="progress-bar medium" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card stat-card">
+                    <div class="stat-icon">
+                        <i>⚠️</i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="belowThreshold" class="warning">-</h3>
+                        <p>Subjects Below 75%</p>
+                    </div>
+                </div>
+                
+                <div class="card stat-card">
+                    <div class="stat-icon">
+                        <i>📝</i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalSubjects">-</h3>
+                        <p>Total Subjects</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Subject-wise Attendance</h3>
+                <table class="attendance-table">
+                    <thead>
+                        <tr>
+                            <th>Subject Code</th>
+                            <th>Subject Name</th>
+                            <th>Classes Attended</th>
+                            <th>Total Classes</th>
+                            <th>Percentage</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subjectTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center;">Loading subject data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="dashboard-grid" style="margin-top: 1.5rem;">
+                <div class="card">
+                    <h3>Recent Attendance</h3>
+                    <table class="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Subject</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentAttendanceBody">
+                            <tr>
+                                <td colspan="3" style="text-align: center;">Loading recent attendance...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="card">
+                    <h3>Alerts & Notifications</h3>
+                    <ul id="alertsList" style="list-style: none; margin-top: 1rem;">
+                        <li style="padding: 0.75rem 0; text-align: center;">
+                            Loading alerts...
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Demo data for testing
+        const demoData = {
+            attendance: {
+                overall: 85,
+                belowThreshold: 1,
+                totalSubjects: 5,
+                courses: [
+                    { courseCode: 'PH101', courseName: 'Engineering Physics', attended: 28, total: 32, percentage: 87.5, status: 'Good' },
+                    { courseCode: 'MA101', courseName: 'Engineering Mathematics', attended: 25, total: 30, percentage: 83.3, status: 'Good' },
+                    { courseCode: 'UHV101', courseName: 'Universal Human Values', attended: 22, total: 30, percentage: 73.3, status: 'Warning' },
+                    { courseCode: 'EE101', courseName: 'Basic Electrical Engineering', attended: 27, total: 32, percentage: 84.4, status: 'Good' },
+                    { courseCode: 'CS101', courseName: 'Data Structures and Algorithms', attended: 28, total: 30, percentage: 93.3, status: 'Good' }
+                ]
+            },
+            courses: [
+                { code: 'PH101', name: 'Engineering Physics', department: 'Physics', teacher_name: 'Dr. Rajesh Kumar', schedule: 'Mon, Wed 10:00 AM', status: 'Active' },
+                { code: 'MA101', name: 'Engineering Mathematics', department: 'Mathematics', teacher_name: 'Dr. Priya Sharma', schedule: 'Tue, Thu 11:00 AM', status: 'Active' },
+                { code: 'UHV101', name: 'Universal Human Values', department: 'Humanities', teacher_name: 'Prof. Amit Patel', schedule: 'Mon, Wed 2:00 PM', status: 'Active' },
+                { code: 'EE101', name: 'Basic Electrical Engineering', department: 'Electrical', teacher_name: 'Dr. Sanjay Verma', schedule: 'Tue, Thu 3:00 PM', status: 'Active' },
+                { code: 'CS101', name: 'Data Structures and Algorithms', department: 'Computer Science', teacher_name: 'Dr. Neha Gupta', schedule: 'Fri 10:00 AM', status: 'Active' }
+            ],
+            alerts: [
+                { type: 'warning', message: 'Low attendance in Universal Human Values (73.3%)', date: '2024-03-20' },
+                { type: 'info', message: 'Next week schedule updated', date: '2024-03-19' },
+                { type: 'info', message: 'Assignment deadline extended for Engineering Physics', date: '2024-03-18' },
+                { type: 'warning', message: 'Upcoming test in Engineering Mathematics', date: '2024-03-17' }
+            ]
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load user info
+            fetch('/api/student/profile')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.profile) {
+                        document.getElementById('userName').textContent = data.profile.name;
+                        document.getElementById('userDetails').textContent = `Student | ${data.profile.department} | ${data.profile.roll_number}`;
+                        document.getElementById('greeting').textContent = `Welcome, ${data.profile.name}!`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading profile:', error);
+                });
+
+            // Get tab from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const tab = urlParams.get('tab');
+            
+            // Handle navigation
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all items
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    
+                    // Add active class to clicked item
+                    this.classList.add('active');
+                    
+                    // Handle different navigation items
+                    const navText = this.textContent.trim();
+                    switch(navText) {
+                        case '📊 Dashboard':
+                            loadDashboardContent();
+                            break;
+                        case '📅 My Attendance':
+                            showAttendanceContent();
+                            break;
+                        case '📝 View Subjects':
+                            showSubjectsContent();
+                            break;
+                        case '📋 Request Leave':
+                            window.location.href = '/leave-request';
+                            break;
+                        case '🔔 Notifications':
+                            showNotificationsContent();
+                            break;
+                        case '⚙️ Settings':
+                            showSettingsContent();
+                            break;
+                        case '🚪 Logout':
+                            fetch('/api/auth/logout', { method: 'POST' })
+                                .then(() => window.location.href = '/')
+                                .catch(error => console.error('Logout error:', error));
+                            break;
+                    }
+                });
+            });
+            
+            // Show content based on tab
+            if (tab) {
+                switch(tab) {
+                    case 'attendance':
+                        showAttendanceContent();
+                        break;
+                    case 'subjects':
+                        showSubjectsContent();
+                        break;
+                    case 'notifications':
+                        showNotificationsContent();
+                        break;
+                    case 'settings':
+                        showSettingsContent();
+                        break;
+                    default:
+                        loadDashboardContent();
+                }
+            } else {
+                loadDashboardContent();
+            }
+        });
+
+        function loadDashboardContent() {
+            const mainContent = document.querySelector('.main-content');
+            mainContent.innerHTML = `
+                <h2 class="page-title">Attendance Dashboard</h2>
+                <div class="dashboard-grid">
+                    <div class="card stat-card">
+                        <div class="stat-icon">
+                            <i>📊</i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>${demoData.attendance.overall}%</h3>
+                            <p>Overall Attendance</p>
+                            <div class="progress-container">
+                                <div class="progress-bar ${demoData.attendance.overall >= 75 ? 'high' : demoData.attendance.overall >= 70 ? 'medium' : 'low'}" 
+                                     style="width: ${demoData.attendance.overall}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon">
+                            <i>⚠️</i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 class="warning">${demoData.attendance.belowThreshold}</h3>
+                            <p>Subjects Below 75%</p>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon">
+                            <i>📝</i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>${demoData.attendance.totalSubjects}</h3>
+                            <p>Total Subjects</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Subject-wise Attendance</h3>
+                    <table class="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>Subject Code</th>
+                                <th>Subject Name</th>
+                                <th>Classes Attended</th>
+                                <th>Total Classes</th>
+                                <th>Percentage</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${demoData.attendance.courses.map(course => `
+                                <tr>
+                                    <td>${course.courseCode}</td>
+                                    <td>${course.courseName}</td>
+                                    <td>${course.attended}</td>
+                                    <td>${course.total}</td>
+                                    <td>${course.percentage}%</td>
+                                    <td>
+                                        <span class="attendance-status ${
+                                            course.percentage >= 75 ? 'status-present' : 
+                                            course.percentage >= 70 ? 'status-leave' : 'status-absent'
+                                        }">
+                                            ${course.status}
+                                        </span>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="dashboard-grid" style="margin-top: 1.5rem;">
+                    <div class="card">
+                        <h3>Recent Notifications</h3>
+                        <ul style="list-style: none; margin-top: 1rem;">
+                            ${demoData.alerts.slice(0, 3).map(alert => `
+                                <li style="padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                                    <p style="color: ${alert.type === 'warning' ? 'var(--warning)' : 'var(--primary)'};">
+                                        <strong>${alert.type === 'warning' ? '⚠️ Warning' : 'ℹ️ Info'}</strong>
+                                    </p>
+                                    <p style="margin: 0.5rem 0;">${alert.message}</p>
+                                    <small style="color: #666;">${alert.date}</small>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showAttendanceContent() {
+            const mainContent = document.querySelector('.main-content');
+            mainContent.innerHTML = `
+                <h2 class="page-title">My Attendance Details</h2>
+                <div class="card" style="margin-bottom: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem;">Attendance Summary</h3>
+                    <div class="dashboard-grid">
+                        <div class="card stat-card">
+                            <div class="stat-icon">
+                                <i>📊</i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>${demoData.attendance.overall}%</h3>
+                                <p>Overall Attendance</p>
+                                <div class="progress-container">
+                                    <div class="progress-bar ${demoData.attendance.overall >= 75 ? 'high' : demoData.attendance.overall >= 70 ? 'medium' : 'low'}" 
+                                         style="width: ${demoData.attendance.overall}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-icon">
+                                <i>⚠️</i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 class="warning">${demoData.attendance.belowThreshold}</h3>
+                                <p>Subjects Below 75%</p>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-icon">
+                                <i>📝</i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>${demoData.attendance.totalSubjects}</h3>
+                                <p>Total Subjects</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Detailed Attendance Record</h3>
+                    <table class="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>Subject Code</th>
+                                <th>Subject Name</th>
+                                <th>Classes Attended</th>
+                                <th>Total Classes</th>
+                                <th>Percentage</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${demoData.attendance.courses.map(course => `
+                                <tr>
+                                    <td>${course.courseCode}</td>
+                                    <td>${course.courseName}</td>
+                                    <td>${course.attended}</td>
+                                    <td>${course.total}</td>
+                                    <td>${course.percentage}%</td>
+                                    <td>
+                                        <span class="attendance-status ${
+                                            course.percentage >= 75 ? 'status-present' : 
+                                            course.percentage >= 70 ? 'status-leave' : 'status-absent'
+                                        }">
+                                            ${course.status}
+                                        </span>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function showSubjectsContent() {
+            const mainContent = document.querySelector('.main-content');
+            mainContent.innerHTML = `
+                <h2 class="page-title">My Courses</h2>
+                <div class="card">
+                    <table class="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>Course Code</th>
+                                <th>Course Name</th>
+                                <th>Department</th>
+                                <th>Teacher</th>
+                                <th>Schedule</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${demoData.courses.map(course => `
+                                <tr>
+                                    <td>${course.code}</td>
+                                    <td>${course.name}</td>
+                                    <td>${course.department}</td>
+                                    <td>${course.teacher_name}</td>
+                                    <td>${course.schedule}</td>
+                                    <td><span class="attendance-status status-present">${course.status}</span></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function showNotificationsContent() {
+            const mainContent = document.querySelector('.main-content');
+            mainContent.innerHTML = `
+                <h2 class="page-title">Notifications & Alerts</h2>
+                <div class="dashboard-grid">
+                    <div class="card" style="flex: 2;">
+                        <h3 style="margin-bottom: 1rem;">Recent Notifications</h3>
+                        <ul style="list-style: none;">
+                            ${demoData.alerts.map(alert => `
+                                <li style="padding: 1rem; border-bottom: 1px solid #eee;">
+                                    <p style="color: ${alert.type === 'warning' ? 'var(--warning)' : 'var(--primary)'};">
+                                        <strong>${alert.type === 'warning' ? '⚠️ Warning' : 'ℹ️ Info'}</strong>
+                                    </p>
+                                    <p style="margin: 0.5rem 0;">${alert.message}</p>
+                                    <small style="color: #666;">${alert.date}</small>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                    <div class="card" style="flex: 1;">
+                        <h3 style="margin-bottom: 1rem;">Attendance Alerts</h3>
+                        <ul style="list-style: none;">
+                            ${demoData.alerts
+                                .filter(n => n.type === 'warning')
+                                .map(alert => `
+                                    <li style="padding: 1rem; border-bottom: 1px solid #eee;">
+                                        <p style="color: var(--warning);">
+                                            <strong>⚠️ Warning:</strong> ${alert.message}
+                                        </p>
+                                        <small style="color: #666;">Updated: ${alert.date}</small>
+                                    </li>
+                                `).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showSettingsContent() {
+            const settingsContent = document.querySelector('.main-content');
+            settingsContent.innerHTML = `
+                <h2 class="page-title">Settings</h2>
+                <div class="card">
+                    <form id="settingsForm" style="max-width: 500px;">
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem;">Email Notifications</label>
+                            <input type="checkbox" checked> Receive email notifications
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem;">Attendance Alerts</label>
+                            <input type="checkbox" checked> Receive attendance alerts
+                        </div>
+                        <button type="submit" style="background-color: var(--primary); color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            Save Settings
+                        </button>
+                    </form>
+                </div>
+            `;
+        }
+
+        function loadSubjectTable(courses) {
+            const subjectTableBody = document.getElementById('subjectTableBody');
+            subjectTableBody.innerHTML = '';
+            
+            courses.forEach(course => {
+                const row = document.createElement('tr');
+                
+                const statusClass = course.status === 'Good' ? 'status-present' : 
+                                    course.status === 'Warning' ? 'status-leave' : 'status-absent';
+                
+                row.innerHTML = `
+                    <td>${course.courseCode}</td>
+                    <td>${course.courseName}</td>
+                    <td>${course.attended}</td>
+                    <td>${course.total}</td>
+                    <td>${course.percentage}%</td>
+                    <td><span class="attendance-status ${statusClass}">${course.status}</span></td>
+                `;
+                
+                subjectTableBody.appendChild(row);
+            });
+        }
+
+        function loadRecentAttendance(attendance) {
+            const recentAttendanceBody = document.getElementById('recentAttendanceBody');
+            recentAttendanceBody.innerHTML = '';
+            
+            attendance.forEach(record => {
+                const row = document.createElement('tr');
+                
+                const statusClass = record.status === 'present' ? 'status-present' : 
+                                    record.status === 'absent' ? 'status-absent' : 'status-leave';
+                
+                row.innerHTML = `
+                    <td>${record.date}</td>
+                    <td>${record.subject}</td>
+                    <td><span class="attendance-status ${statusClass}">${record.status}</span></td>
+                `;
+                
+                recentAttendanceBody.appendChild(row);
+            });
+        }
+
+        function loadAlerts(notifications) {
+            const alertsList = document.getElementById('alertsList');
+            alertsList.innerHTML = '';
+            
+            notifications.forEach(notification => {
+                const li = document.createElement('li');
+                li.style.padding = '0.75rem 0';
+                li.style.borderBottom = '1px solid #eee';
+                
+                const color = notification.type === 'danger' ? 'var(--danger)' : 
+                              notification.type === 'warning' ? 'var(--warning)' : '';
+                
+                li.innerHTML = `
+                    <p ${color ? `style="color: ${color};"` : ''}><strong>${notification.message.split(':')[0]}:</strong> ${notification.message.split(':')[1]}</p>
+                    <small>Updated: ${notification.date}</small>
+                `;
+                
+                alertsList.appendChild(li);
+            });
+        }
+    </script>
+</body>
+</html>

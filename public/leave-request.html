@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Leave - JUIT Attendance Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #1a3c6b;
+            --secondary: #4a6baf;
+            --accent: #f7941d;
+            --light: #f5f7fa;
+            --dark: #333;
+            --danger: #dc3545;
+            --success: #28a745;
+            --warning: #ffc107;
+        }
+        
+        body {
+            background-color: #f0f2f5;
+            color: var(--dark);
+        }
+        
+        .header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo img {
+            height: 50px;
+            margin-right: 1rem;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: calc(100vh - 70px);
+        }
+        
+        .sidebar {
+            background-color: white;
+            padding: 2rem 0;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+        }
+        
+        .nav-item {
+            padding: 0.8rem 2rem;
+            display: flex;
+            align-items: center;
+            color: var(--dark);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .nav-item.active, .nav-item:hover {
+            background-color: var(--light);
+            color: var(--primary);
+            border-left: 4px solid var(--accent);
+        }
+        
+        .nav-item i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .main-content {
+            padding: 2rem;
+        }
+        
+        .page-title {
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(26, 60, 107, 0.1);
+        }
+        
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary);
+        }
+        
+        .leave-history {
+            margin-top: 2rem;
+        }
+        
+        .leave-history h3 {
+            margin-bottom: 1rem;
+        }
+        
+        .leave-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .leave-table th, .leave-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .leave-table th {
+            background-color: var(--light);
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .status-pending {
+            color: var(--warning);
+        }
+        
+        .status-approved {
+            color: var(--success);
+        }
+        
+        .status-rejected {
+            color: var(--danger);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <img src="/api/placeholder/100/50" alt="JUIT Logo">
+            <h1>JUIT Attendance Portal</h1>
+        </div>
+        <div class="user-info">
+            <img src="/api/placeholder/40/40" alt="User Avatar">
+            <div>
+                <p id="userName">Student Name</p>
+                <small id="userDetails">Loading...</small>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <aside class="sidebar">
+            <nav>
+                <a href="#" class="nav-item" data-page="dashboard">
+                    <i>📊</i> Dashboard
+                </a>
+                <a href="#" class="nav-item" data-page="attendance">
+                    <i>📅</i> My Attendance
+                </a>
+                <a href="#" class="nav-item" data-page="subjects">
+                    <i>📝</i> View Subjects
+                </a>
+                <a href="#" class="nav-item active" data-page="leave">
+                    <i>📋</i> Request Leave
+                </a>
+                <a href="#" class="nav-item" data-page="notifications">
+                    <i>🔔</i> Notifications
+                </a>
+                <a href="#" class="nav-item" data-page="settings">
+                    <i>⚙️</i> Settings
+                </a>
+                <a href="#" class="nav-item" id="logoutBtn">
+                    <i>🚪</i> Logout
+                </a>
+            </nav>
+        </aside>
+        
+        <main class="main-content">
+            <h2 class="page-title">Request Leave</h2>
+            
+            <div class="card">
+                <form id="leaveRequestForm">
+                    <div class="form-group">
+                        <label for="leaveDate">Date</label>
+                        <input type="date" id="leaveDate" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="leaveType">Type of Leave</label>
+                        <select id="leaveType" class="form-control" required>
+                            <option value="">Select leave type</option>
+                            <option value="medical">Medical Leave</option>
+                            <option value="personal">Personal Leave</option>
+                            <option value="emergency">Emergency Leave</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="leaveReason">Reason for Leave</label>
+                        <textarea id="leaveReason" class="form-control" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="supportingDocs">Supporting Documents (if any)</label>
+                        <input type="file" id="supportingDocs" class="form-control">
+                    </div>
+                    
+                    <button type="submit" class="btn">Submit Request</button>
+                </form>
+            </div>
+            
+            <div class="card leave-history">
+                <h3>Leave History</h3>
+                <table class="leave-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaveHistoryBody">
+                        <tr>
+                            <td>21 Mar 2025</td>
+                            <td>Medical Leave</td>
+                            <td>Doctor's appointment</td>
+                            <td class="status-approved">Approved</td>
+                            <td>Approved with documentation</td>
+                        </tr>
+                        <tr>
+                            <td>15 Mar 2025</td>
+                            <td>Personal Leave</td>
+                            <td>Family function</td>
+                            <td class="status-pending">Pending</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>10 Mar 2025</td>
+                            <td>Emergency Leave</td>
+                            <td>Family emergency</td>
+                            <td class="status-approved">Approved</td>
+                            <td>Approved</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load user info
+            fetch('/api/auth/me')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('userName').textContent = data.name;
+                    document.getElementById('userDetails').textContent = `Student | ${data.department} | ${data.rollNumber}`;
+                })
+                .catch(error => {
+                    console.error('Error loading user info:', error);
+                });
+            
+            // Handle form submission
+            document.getElementById('leaveRequestForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    date: document.getElementById('leaveDate').value,
+                    type: document.getElementById('leaveType').value,
+                    reason: document.getElementById('leaveReason').value,
+                    documents: document.getElementById('supportingDocs').files
+                };
+                
+                // Here you would typically send this data to your backend
+                console.log('Leave request submitted:', formData);
+                
+                // Show success message
+                alert('Leave request submitted successfully!');
+                
+                // Reset form
+                this.reset();
+            });
+            
+            // Handle navigation
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all items
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    
+                    // Add active class to clicked item
+                    this.classList.add('active');
+                    
+                    const page = this.getAttribute('data-page');
+                    switch(page) {
+                        case 'dashboard':
+                            window.location.href = '/dashboard';
+                            break;
+                        case 'attendance':
+                            window.location.href = '/dashboard?tab=attendance';
+                            break;
+                        case 'subjects':
+                            window.location.href = '/dashboard?tab=subjects';
+                            break;
+                        case 'leave':
+                            window.location.href = '/leave-request';
+                            break;
+                        case 'notifications':
+                            window.location.href = '/dashboard?tab=notifications';
+                            break;
+                        case 'settings':
+                            window.location.href = '/dashboard?tab=settings';
+                            break;
+                    }
+                });
+            });
+            
+            // Handle logout
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = '/';
+            });
+        });
+    </script>
+</body>
+</html> 
