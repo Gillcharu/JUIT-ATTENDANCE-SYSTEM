@@ -187,8 +187,8 @@ router.get('/notifications', (req, res) => {
     const recentLeaves = getRecentLeaveRequests(req.user.id);
     recentLeaves.forEach(leave => {
       if (leave.status === 'approved') {
-        notifications.push({
-          title: 'Leave Approved',
+    notifications.push({
+      title: 'Leave Approved',
           message: `Your leave request for ${new Date(leave.date).toLocaleDateString('en-US', { 
             year: 'numeric', 
             month: 'short', 
@@ -199,10 +199,10 @@ router.get('/notifications', (req, res) => {
             month: 'short', 
             day: 'numeric' 
           }),
-          type: 'info'
-        });
+      type: 'info'
+    });
       } else if (leave.status === 'rejected') {
-        notifications.push({
+    notifications.push({
           title: 'Leave Rejected',
           message: `Your leave request for ${new Date(leave.date).toLocaleDateString('en-US', { 
             year: 'numeric', 
@@ -215,7 +215,7 @@ router.get('/notifications', (req, res) => {
             day: 'numeric' 
           }),
           type: 'warning'
-        });
+    });
       }
     });
     

@@ -823,7 +823,7 @@
                     </table>
                 </div>
             `;
-
+            
             // Add event listeners for filtering
             document.getElementById('searchStudent').addEventListener('input', filterLeaveRequests);
             document.getElementById('startDate').addEventListener('change', filterLeaveRequests);
@@ -905,259 +905,27 @@
             }
         }
 
-        // Update demo data to include reasons
-        demoData.leaveRequests = demoData.leaveRequests.map(request => ({
-            ...request,
-            reason: request.reason || 'Medical leave'
-        }));
-
-        function showNotificationsContent() {
-            const mainContent = document.querySelector('.main-content');
-            mainContent.innerHTML = `
-                <h2 class="page-title">Notifications</h2>
-                <div class="card">
-                    <div style="margin-bottom: 1rem;">
-                        <button class="btn btn-primary" onclick="showSendNotificationForm()">Send New Notification</button>
-                    </div>
-                    <ul style="list-style: none;">
-                        ${demoData.notifications.map(notification => `
-                            <li style="padding: 1rem; border-bottom: 1px solid #eee;">
-                                <p><span class="notification-type" style="color: ${notification.type === 'warning' ? 'var(--warning)' : 'var(--primary)'};">
-                                    ${notification.type === 'warning' ? 'Warning' : 'Information'}
-                                </span></p>
-                                <p style="margin: 0.5rem 0;">${notification.message}</p>
-                                <small style="color: #666;">${notification.date}</small>
-                            </li>
-                        `).join('')}
-                    </ul>
-                </div>
-            `;
-        }
-
-        // Placeholder functions for actions
-        function markAttendance(courseCode) {
-            const course = demoData.courses.find(c => c.code === courseCode);
-            if (!course) return;
-
-            const mainContent = document.querySelector('.main-content');
-            mainContent.innerHTML = `
-                <h2 class="page-title">Mark Attendance - ${course.name}</h2>
-                <div class="card">
-                    <h3>Course: ${course.name}</h3>
-                    <form id="attendanceForm" style="margin-top: 1rem;">
-                        <div style="margin-bottom: 1rem;">
-                            <label style="display: block; margin-bottom: 0.5rem;">Date</label>
-                            <input type="date" id="attendanceDate" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                        </div>
-                        <table class="attendance-table">
-                            <thead>
-                                <tr>
-                                    <th>Roll Number</th>
-                                    <th>Student Name</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${demoStudents.map(student => `
-                                    <tr>
-                                        <td>${student.roll_number}</td>
-                                        <td>${student.name}</td>
-                                        <td>
-                                            <select name="attendance[${student.id}]" required style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                                                <option value="present">Present</option>
-                                                <option value="absent">Absent</option>
-                                                <option value="leave">Leave</option>
-                                            </select>
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                        <div style="margin-top: 1rem; text-align: right;">
-                            <button type="submit" style="background-color: var(--primary); color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
-                                Submit Attendance
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            `;
-
-            // Add form submit handler
-            document.getElementById('attendanceForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const date = document.getElementById('attendanceDate').value;
-                const attendanceData = {};
-                
-                // Get attendance status for each student
-                demoStudents.forEach(student => {
-                    const select = document.querySelector(`select[name="attendance[${student.id}]"]`);
-                    attendanceData[student.id] = select.value;
-                });
-
-                // Submit attendance
-                fetch(`/api/teacher/courses/${course.code}/attendance`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        date,
-                        attendanceData
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert('Attendance marked successfully!');
-                    showCoursesContent(); // Go back to courses list
-                })
-                .catch(error => {
-                    console.error('Error marking attendance:', error);
-                    alert('Error marking attendance. Please try again.');
-                });
-            });
-        }
-
-        function viewStudents(courseCode) {
-            const course = demoData.courses.find(c => c.code === courseCode);
-            if (!course) return;
-
-            const mainContent = document.querySelector('.main-content');
-            mainContent.innerHTML = `
-                <h2 class="page-title">Students - ${course.name}</h2>
-                <div class="card">
-                    <div style="margin-bottom: 1rem;">
-                        <button class="btn btn-primary" onclick="markAttendance('${courseCode}')">Mark Attendance</button>
-                        <button class="btn btn-secondary" onclick="showCoursesContent()">Back to Courses</button>
-                    </div>
-                    <table class="attendance-table">
-                        <thead>
-                            <tr>
-                                <th>Roll Number</th>
-                                <th>Name</th>
-                                <th>Department</th>
-                                <th>Attendance</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${demoData.students.map(student => {
-                                const attendance = Math.floor(Math.random() * 100); // Demo data
-                                const status = attendance >= 75 ? 'Good' : attendance >= 70 ? 'Warning' : 'Critical';
-                                const statusClass = status === 'Good' ? 'status-present' : 
-                                                  status === 'Warning' ? 'status-leave' : 'status-absent';
-                                return `
-                                    <tr>
-                                        <td>${student.roll_number}</td>
-                                        <td>${student.name}</td>
-                                        <td>${student.department}</td>
-                                        <td>${attendance}%</td>
-                                        <td><span class="attendance-status ${statusClass}">${status}</span></td>
-                                    </tr>
-                                `;
-                            }).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        }
-
-        // Add demo students data
-        const demoStudents = [
-            { id: 1, roll_number: 'CS2023001', name: 'Rahul Sharma', department: 'Computer Science' },
-            { id: 2, roll_number: 'CS2023002', name: 'Priya Patel', department: 'Computer Science' },
-            { id: 3, roll_number: 'CS2023003', name: 'Amit Kumar', department: 'Computer Science' },
-            { id: 4, roll_number: 'CS2023004', name: 'Neha Singh', department: 'Computer Science' },
-            { id: 5, roll_number: 'CS2023005', name: 'Vikram Verma', department: 'Computer Science' }
-        ];
-
-        // Add students to demo data
-        demoData.students = demoStudents;
-
-        function showSendNotificationForm() {
-            alert('Show send notification form');
-        }
-
-        function approveRequest(student, course, date) {
-            // Find the request in demo data
-            const request = demoData.leaveRequests.find(req => 
-                req.student === student && 
-                req.course === course && 
-                req.date === date
-            );
-            
-            if (request) {
-                request.status = 'approved';
-                
-                // Add notification
-                demoData.notifications.unshift({
-                    type: 'info',
-                    message: `Leave request for ${student} (${course}) on ${date} has been approved`,
-                    date: new Date().toLocaleDateString()
-                });
-                
-                // Update UI
-                loadLeaveRequests();
-                loadNotifications();
-                
-                // Update pending requests count
-                document.getElementById('pendingRequests').textContent = 
-                    demoData.leaveRequests.filter(req => req.status === 'pending').length;
-                
-                // Show success message
-                alert('Leave request approved successfully!');
-            }
-        }
-
-        function rejectRequest(student, course, date) {
-            // Find the request in demo data
-            const request = demoData.leaveRequests.find(req => 
-                req.student === student && 
-                req.course === course && 
-                req.date === date
-            );
-            
-            if (request) {
-                request.status = 'rejected';
-                
-                // Add notification
-                demoData.notifications.unshift({
-                    type: 'warning',
-                    message: `Leave request for ${student} (${course}) on ${date} has been rejected`,
-                    date: new Date().toLocaleDateString()
-                });
-                
-                // Update UI
-                loadLeaveRequests();
-                loadNotifications();
-                
-                // Update pending requests count
-                document.getElementById('pendingRequests').textContent = 
-                    demoData.leaveRequests.filter(req => req.status === 'pending').length;
-                
-                // Show success message
-                alert('Leave request rejected successfully!');
-            }
-        }
-
-        // Add download function
         function downloadApprovedLeaves() {
-            // Filter approved leave requests
+            // Get all approved leave requests
             const approvedLeaves = demoData.leaveRequests.filter(request => request.status === 'approved');
             
             if (approvedLeaves.length === 0) {
-                alert('No approved leave requests to download.');
+                alert('No approved leaves to download.');
                 return;
             }
 
-            // Create CSV content
-            const headers = ['Student Name', 'Course', 'Date', 'Status'];
+            // Format the data for CSV
             const csvContent = [
-                headers.join(','),
+                // CSV Headers
+                ['Student Name', 'Course', 'Date', 'Reason', 'Status', 'Approved Date'].join(','),
+                // CSV Data rows
                 ...approvedLeaves.map(leave => [
                     leave.student,
                     leave.course,
                     leave.date,
-                    leave.status
+                    leave.reason || 'Not specified',
+                    leave.status,
+                    new Date().toLocaleDateString() // Using current date as approved date for demo
                 ].join(','))
             ].join('\n');
 
@@ -1173,6 +941,377 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        }
+
+        // Update demo data to include reasons
+        demoData.leaveRequests = demoData.leaveRequests.map(request => ({
+            ...request,
+            reason: request.reason || 'Medical leave'
+        }));
+
+        function showNotificationsContent() {
+            const mainContent = document.querySelector('.main-content');
+            mainContent.innerHTML = `
+                <h2 class="page-title">Notifications</h2>
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <div style="display: flex; gap: 1rem;">
+                            <button class="btn btn-primary" onclick="showSendNotificationForm()" style="background: linear-gradient(90deg, #1a3c6b 60%, #4a6baf 100%); color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 5v14M5 12h14"></path>
+                                </svg>
+                                Send New Notification
+                            </button>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="text" id="searchNotification" placeholder="Search notifications..." style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 200px;">
+                                <select id="filterType" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    <option value="all">All Types</option>
+                                    <option value="info">Information</option>
+                                    <option value="warning">Warning</option>
+                                    <option value="success">Success</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                    </div>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="exportNotifications()" style="padding: 8px 16px; border: 1px solid #ddd; border-radius: 4px; background: #f5f5f5; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                Export
+                            </button>
+                        </div>
+                    </div>
+                    <div id="notificationsList" style="max-height: 600px; overflow-y: auto;">
+                        ${demoData.notifications.map(notification => `
+                            <div style="padding: 1rem; border-bottom: 1px solid #eee; background: ${notification.status === 'scheduled' ? '#fff8e1' : 'white'};">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                                    <div>
+                                        <span class="notification-type" style="color: ${getNotificationColor(notification.type)}; font-weight: 600;">
+                                            ${notification.type.charAt(0).toUpperCase() + notification.type.slice(1)}
+                                        </span>
+                                        ${notification.priority === 'high' ? 
+                                            '<span style="margin-left: 0.5rem; color: var(--danger); font-size: 0.9rem;">High Priority</span>' : ''}
+                                    </div>
+                                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                        ${notification.status === 'scheduled' ? 
+                                            `<span style="color: var(--warning); font-size: 0.9rem;">
+                                                Scheduled for ${new Date(notification.scheduleTime).toLocaleString()}
+                                            </span>` : ''}
+                                <small style="color: #666;">${notification.date}</small>
+                                    </div>
+                                </div>
+                                <h4 style="margin: 0.5rem 0; font-size: 1.1rem;">${notification.title}</h4>
+                                <p style="margin: 0.5rem 0; color: #444;">${notification.message}</p>
+                                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                                    <span style="font-size: 0.9rem; color: #666;">
+                                        Target: ${getTargetLabel(notification.target)}
+                                    </span>
+                                    ${notification.status === 'scheduled' ? `
+                                        <button onclick="cancelScheduledNotification('${notification.date}')" style="padding: 4px 8px; border: 1px solid var(--danger); border-radius: 4px; color: var(--danger); background: transparent; cursor: pointer; font-size: 0.9rem;">
+                                            Cancel
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            // Add event listeners for search and filter
+            document.getElementById('searchNotification').addEventListener('input', filterNotifications);
+            document.getElementById('filterType').addEventListener('change', filterNotifications);
+        }
+
+        function getNotificationColor(type) {
+            switch(type) {
+                case 'warning': return 'var(--warning)';
+                case 'success': return 'var(--success)';
+                case 'urgent': return 'var(--danger)';
+                default: return 'var(--primary)';
+            }
+        }
+
+        function getTargetLabel(target) {
+            switch(target) {
+                case 'all': return 'All Students';
+                case 'course': return 'Specific Course';
+                case 'department': return 'Specific Department';
+                case 'year': return 'Specific Year';
+                default: return target;
+            }
+        }
+
+        function filterNotifications() {
+            const searchTerm = document.getElementById('searchNotification').value.toLowerCase();
+            const filterType = document.getElementById('filterType').value;
+            
+            const filteredNotifications = demoData.notifications.filter(notification => {
+                const matchesSearch = 
+                    notification.title.toLowerCase().includes(searchTerm) ||
+                    notification.message.toLowerCase().includes(searchTerm);
+                const matchesType = filterType === 'all' || notification.type === filterType;
+                return matchesSearch && matchesType;
+            });
+            
+            const notificationsList = document.getElementById('notificationsList');
+            notificationsList.innerHTML = filteredNotifications.map(notification => `
+                <div style="padding: 1rem; border-bottom: 1px solid #eee; background: ${notification.status === 'scheduled' ? '#fff8e1' : 'white'};">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                        <div>
+                            <span class="notification-type" style="color: ${getNotificationColor(notification.type)}; font-weight: 600;">
+                                ${notification.type.charAt(0).toUpperCase() + notification.type.slice(1)}
+                            </span>
+                            ${notification.priority === 'high' ? 
+                                '<span style="margin-left: 0.5rem; color: var(--danger); font-size: 0.9rem;">High Priority</span>' : ''}
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            ${notification.status === 'scheduled' ? 
+                                `<span style="color: var(--warning); font-size: 0.9rem;">
+                                    Scheduled for ${new Date(notification.scheduleTime).toLocaleString()}
+                                </span>` : ''}
+                            <small style="color: #666;">${notification.date}</small>
+                        </div>
+                    </div>
+                    <h4 style="margin: 0.5rem 0; font-size: 1.1rem;">${notification.title}</h4>
+                    <p style="margin: 0.5rem 0; color: #444;">${notification.message}</p>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                        <span style="font-size: 0.9rem; color: #666;">
+                            Target: ${getTargetLabel(notification.target)}
+                        </span>
+                        ${notification.status === 'scheduled' ? `
+                            <button onclick="cancelScheduledNotification('${notification.date}')" style="padding: 4px 8px; border: 1px solid var(--danger); border-radius: 4px; color: var(--danger); background: transparent; cursor: pointer; font-size: 0.9rem;">
+                                Cancel
+                            </button>
+                        ` : ''}
+                        </div>
+                </div>
+            `).join('');
+        }
+
+        function cancelScheduledNotification(date) {
+            if (confirm('Are you sure you want to cancel this scheduled notification?')) {
+                const notification = demoData.notifications.find(n => n.date === date);
+                if (notification) {
+                    notification.status = 'cancelled';
+                    showNotificationsContent();
+                }
+            }
+        }
+
+        function exportNotifications() {
+            const notifications = demoData.notifications.map(n => ({
+                Type: n.type,
+                Title: n.title,
+                Message: n.message,
+                Priority: n.priority,
+                Target: getTargetLabel(n.target),
+                Date: n.date,
+                Status: n.status,
+                Scheduled: n.scheduled ? new Date(n.scheduleTime).toLocaleString() : 'N/A'
+            }));
+
+            const csvContent = [
+                Object.keys(notifications[0]).join(','),
+                ...notifications.map(n => Object.values(n).join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `notifications_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function showSendNotificationForm() {
+            const mainContent = document.querySelector('.main-content');
+            mainContent.innerHTML = `
+                <h2 class="page-title">Send Notification</h2>
+                <div class="card">
+                    <form id="notificationForm" style="max-width: 800px; margin: 0 auto;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                            <div>
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Notification Type</label>
+                                <select id="notificationType" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
+                                    <option value="info">Information</option>
+                                    <option value="warning">Warning</option>
+                                    <option value="success">Success</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                    </div>
+                            
+                            <div>
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Target Audience</label>
+                                <select id="targetAudience" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
+                                    <option value="all">All Students</option>
+                                    <option value="course">Specific Course</option>
+                                    <option value="department">Specific Department</option>
+                                    <option value="year">Specific Year</option>
+                                </select>
+                </div>
+                        </div>
+
+                        <div id="targetDetails" style="margin-bottom: 1.5rem; display: none;">
+                            <!-- Dynamic content based on target audience selection -->
+                        </div>
+                        
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Title</label>
+                            <input type="text" id="notificationTitle" required placeholder="Enter notification title" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
+                        </div>
+                        
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Message</label>
+                            <textarea id="notificationMessage" required placeholder="Enter your notification message" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; min-height: 120px; font-size: 1rem; resize: vertical;"></textarea>
+                        </div>
+
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Priority Level</label>
+                            <div style="display: flex; gap: 1rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="radio" name="priority" value="low" checked>
+                                    <span>Low</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="radio" name="priority" value="medium">
+                                    <span>Medium</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="radio" name="priority" value="high">
+                                    <span>High</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Schedule (Optional)</label>
+                            <div style="display: flex; gap: 1rem; align-items: center;">
+                                <input type="datetime-local" id="scheduleTime" style="padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="checkbox" id="scheduleEnabled">
+                                    <span>Enable scheduling</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                            <button type="button" onclick="showNotificationsContent()" style="padding: 0.75rem 1.5rem; border: 1px solid #ddd; border-radius: 4px; background: #f5f5f5; cursor: pointer;">
+                                Cancel
+                            </button>
+                            <button type="submit" style="padding: 0.75rem 1.5rem; border: none; border-radius: 4px; background: var(--primary); color: white; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z"/>
+                                </svg>
+                                Send Notification
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+
+            // Add event listeners
+            const targetAudience = document.getElementById('targetAudience');
+            const targetDetails = document.getElementById('targetDetails');
+            const scheduleEnabled = document.getElementById('scheduleEnabled');
+            const scheduleTime = document.getElementById('scheduleTime');
+
+            targetAudience.addEventListener('change', function() {
+                const value = this.value;
+                let content = '';
+                
+                switch(value) {
+                    case 'course':
+                        content = `
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Select Course</label>
+                            <select required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
+                                ${demoData.courses.map(course => `
+                                    <option value="${course.code}">${course.name} (${course.code})</option>
+                                `).join('')}
+                            </select>
+                        `;
+                        break;
+                    case 'department':
+                        content = `
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Select Department</label>
+                            <select required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
+                                <option value="cse">Computer Science</option>
+                                <option value="ece">Electronics</option>
+                                <option value="me">Mechanical</option>
+                                <option value="ce">Civil</option>
+                            </select>
+                        `;
+                        break;
+                    case 'year':
+                        content = `
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Select Year</label>
+                            <select required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
+                                <option value="1">First Year</option>
+                                <option value="2">Second Year</option>
+                                <option value="3">Third Year</option>
+                                <option value="4">Fourth Year</option>
+                            </select>
+                        `;
+                        break;
+                }
+                
+                targetDetails.innerHTML = content;
+                targetDetails.style.display = value === 'all' ? 'none' : 'block';
+            });
+
+            scheduleEnabled.addEventListener('change', function() {
+                scheduleTime.disabled = !this.checked;
+                if (this.checked) {
+                    scheduleTime.required = true;
+                } else {
+                    scheduleTime.required = false;
+                }
+            });
+
+            // Add form submit handler
+            document.getElementById('notificationForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const type = document.getElementById('notificationType').value;
+                const title = document.getElementById('notificationTitle').value;
+                const message = document.getElementById('notificationMessage').value;
+                const priority = document.querySelector('input[name="priority"]:checked').value;
+                const target = document.getElementById('targetAudience').value;
+                const isScheduled = document.getElementById('scheduleEnabled').checked;
+                const scheduleTime = isScheduled ? document.getElementById('scheduleTime').value : null;
+                
+                // Add new notification to demo data
+                const newNotification = {
+                    type,
+                    title,
+                    message,
+                    priority,
+                    target,
+                    date: new Date().toLocaleDateString(),
+                    scheduled: isScheduled,
+                    scheduleTime: scheduleTime,
+                    status: isScheduled ? 'scheduled' : 'sent'
+                };
+                
+                demoData.notifications.unshift(newNotification);
+                
+                // Show success message
+                alert(isScheduled ? 
+                    'Notification scheduled successfully!' : 
+                    'Notification sent successfully!'
+                );
+                
+                // Return to notifications list
+                showNotificationsContent();
+            });
         }
     </script>
 </body>
